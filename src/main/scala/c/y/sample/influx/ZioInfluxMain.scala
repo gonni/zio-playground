@@ -25,7 +25,31 @@ object ZioInfluxMain extends ZIOAppDefault {
   val client = InfluxDBClientScalaFactory.create(
     "http://localhost:8086", secToken.toCharArray, org, bucket)
 
-  def influxCliet: [Any, Throwable, InfluxDBClientScala] = ZLayer.fromFunction()
+  trait InfluxClient {
+    def write(fluxDataValue: String)
+  }
 
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = ???
+  case class InfluxClientImpl(client: InfluxDBClientScala) extends InfluxClient {
+    override def write(fluxDataValue: String): Unit = {
+      val source = Source.single(fluxDataValue)
+      val sink = client.getWriteScalaApi.writeRecord()
+      val materialized = source.toMat(sink)(Keep.right)
+//      materialized.run()
+      Await.result(materialized.run(), Duration.Inf)
+    }
+  }
+
+  object InfluxClient {
+    def layer: ZLayer[Any, Nothing, InfluxClient] = ZLayer.succeed(InfluxClientImpl(client))
+  }
+
+  val myApp: ZIO[InfluxClient, Nothing, Unit] =
+    for {
+      insert <- ZIO.serviceWith[InfluxClient](_.write("mem,host=host17 used_percent=123.567")).fork
+            _ <- Console.printLine("Job Completed ").exitCode
+    } yield ()
+
+
+  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
+    myApp.debug("debug").provide(InfluxClient.layer)
 }
