@@ -18,8 +18,10 @@ object ZioInfluxMain extends ZIOAppDefault {
 
   implicit val system: ActorSystem = ActorSystem("examples")
 
-  val secToken = "g4jKhq-LzEQABu7OPmE0Pvr7lVO9UJlb5IfroOZNvMLueLQscGZ7D55x_utgjQTzYICdumY4jhd0zVTuCUcexw=="
-  val org = "XSTORE"
+//  val secToken = "g4jKhq-LzEQABu7OPmE0Pvr7lVO9UJlb5IfroOZNvMLueLQscGZ7D55x_utgjQTzYICdumY4jhd0zVTuCUcexw=="
+//  val org = "XSTORE"
+  val secToken = "apKD5bj-T88DrXIOzYzJJIroufE4LMczCHKzasxRyCo8npL1VSjBlzY1QPKwVRJ5WgX_Uc_B-Swc9kKt7qbczg=="
+  val org = "KYG"
   val bucket = "logstream"
 
   val client = InfluxDBClientScalaFactory.create(
@@ -45,7 +47,7 @@ object ZioInfluxMain extends ZIOAppDefault {
 
   val myApp: ZIO[InfluxClient, Nothing, Unit] =
     for {
-      insert <- ZIO.serviceWith[InfluxClient](_.write("mem,host=host17 used_percent=123.567")).fork
+      insert <- ZIO.serviceWith[InfluxClient](_.write("mem,host=host7 used_percent=12.567")).fork
             _ <- Console.printLine("Job Completed ").exitCode
     } yield ()
 
