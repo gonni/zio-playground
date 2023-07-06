@@ -1,8 +1,7 @@
-package c.y.sample.zio
+package c.y.sample.service
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Keep, Source}
-import c.y.sample.kafka.ClickLogStream.syncInfluxZio
 import com.influxdb.client.scala.{InfluxDBClientScala, InfluxDBClientScalaFactory}
 import zio._
 import zio.kafka.consumer.{Consumer, ConsumerSettings, Subscription}
@@ -60,7 +59,6 @@ object Kafka2Influx extends ZIOAppDefault{
       _ <- ZIO.serviceWith[InfluxClient](_.write(kd)).fork
       _ <- Console.printLine(s"Data Inserted to Kafka: $kd")
     } yield()
-
 
   def consumerLayer: ZLayer[Any, Throwable, Consumer] =
     ZLayer.scoped(
